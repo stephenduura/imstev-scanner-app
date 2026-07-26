@@ -275,6 +275,38 @@
         <!-- Routine steps populated dynamically by app.js -->
       </div>
 
+      <!-- Herbal & Medical Treatment Recommendations Card -->
+      <h3 class="section-title" style="margin-top: 24px;">
+        <i class="material-symbols-outlined">health_and_safety</i>
+        Treatment Recommendations
+      </h3>
+      <div class="results-card" style="padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; gap: 16px;">
+          <!-- Herbal (Botanical) Recommendations -->
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
+            <h4 style="font-size: 13px; font-weight: bold; color: var(--primary-emerald); display: flex; align-items: center; gap: 6px; margin: 0;">
+              <i class="material-symbols-outlined" style="font-size: 18px;">forest</i>Botanical Remedies
+            </h4>
+            <ul id="results-herbal-list" style="font-size: 12px; color: var(--text-secondary); line-height: 1.5; padding-left: 16px; margin: 0;">
+              <!-- Populated dynamically -->
+            </ul>
+          </div>
+          
+          <!-- Divider line -->
+          <div style="width: 1px; background: rgba(74, 62, 61, 0.1);"></div>
+
+          <!-- Medical Recommendations -->
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
+            <h4 style="font-size: 13px; font-weight: bold; color: var(--primary-brown); display: flex; align-items: center; gap: 6px; margin: 0;">
+              <i class="material-symbols-outlined" style="font-size: 18px;">medical_services</i>Clinical Treatment
+            </h4>
+            <ul id="results-medical-list" style="font-size: 12px; color: var(--text-secondary); line-height: 1.5; padding-left: 16px; margin: 0;">
+              <!-- Populated dynamically -->
+            </ul>
+          </div>
+        </div>
+      </div>
+
       <!-- Recommended Products -->
       <h3 class="section-title">
         <i class="material-symbols-outlined">shopping_basket</i>

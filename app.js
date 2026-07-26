@@ -240,7 +240,9 @@ function initElements() {
     compareBeforeImg: document.getElementById('compare-before-img'),
     compareAfterContainer: document.getElementById('compare-after-container'),
     compareAfterImg: document.getElementById('compare-after-img'),
-    compareSliderHandle: document.getElementById('compare-slider-handle')
+    compareSliderHandle: document.getElementById('compare-slider-handle'),
+    resultsHerbalList: document.getElementById('results-herbal-list'),
+    resultsMedicalList: document.getElementById('results-medical-list')
   };
 }
 
@@ -956,6 +958,35 @@ function renderResultsDashboard(report) {
       elements.resultsProductsCarousel.appendChild(card);
     });
   }
+
+  // Render Herbal & Medical Treatment Recommendations
+  elements.resultsHerbalList.innerHTML = "";
+  elements.resultsMedicalList.innerHTML = "";
+  
+  const herbal = report.herbalRecommendations || [
+    "Apply organic cold-pressed Tea Tree Oil or Aloe Vera.",
+    "Rinse with lukewarm Green Tea infusion to balance sebum.",
+    "Use a honey-based botanical mask for natural hydration."
+  ];
+  const medical = report.medicalRecommendations || [
+    "Apply over-the-counter Benzoyl Peroxide (2.5%) spot treatment.",
+    "Use a Salicylic Acid (2%) clinical exfoliating wash daily.",
+    "Consult a board-certified dermatologist if inflammation worsens."
+  ];
+  
+  herbal.forEach(rec => {
+    const li = document.createElement('li');
+    li.style.marginBottom = "6px";
+    li.innerText = rec;
+    elements.resultsHerbalList.appendChild(li);
+  });
+  
+  medical.forEach(rec => {
+    const li = document.createElement('li');
+    li.style.marginBottom = "6px";
+    li.innerText = rec;
+    elements.resultsMedicalList.appendChild(li);
+  });
 }
 
 // Renders Scan History List

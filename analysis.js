@@ -188,6 +188,63 @@ function analyzeSkin(visual, answers) {
     return matchesType || matchesCondition;
   }).slice(0, 3);
 
+  let herbalRecommendations = [
+    "Apply organic Aloe Vera gel to soothe and cool the skin barrier.",
+    "Rinse skin with Green Tea extract to deliver calming antioxidants.",
+    "Use a pure Honey wash to provide natural antibacterial hydration."
+  ];
+  let medicalRecommendations = [
+    "Cleanse daily with a pH-balanced, non-comedogenic gentle wash.",
+    "Apply a broad-spectrum mineral sunscreen SPF 30+ every morning.",
+    "Consult with a board-certified dermatologist for tailored prescription care."
+  ];
+
+  if (primaryConcern.name === "Acne") {
+    herbalRecommendations = [
+      "Use diluted Tea Tree Oil (diluted in jojoba oil) directly on blemishes.",
+      "Apply raw Honey mask for 10 minutes to act as a natural antibacterial.",
+      "Wipe face with witch hazel extract (alcohol-free) to control sebum."
+    ];
+    medicalRecommendations = [
+      "Use a Salicylic Acid (2%) cleanser daily to clear clogged pores.",
+      "Apply Benzoyl Peroxide (2.5%) spot treatment to clear active pustules.",
+      "Consider a mild retinol or adapalene gel at night to promote cell turnover."
+    ];
+  } else if (primaryConcern.name === "Redness" || skinType === "sensitive") {
+    herbalRecommendations = [
+      "Apply Chamomile or Calendula botanical extracts to calm irritation.",
+      "Use an Oatmeal paste mask to soothe itchy, sensitive skin patches.",
+      "Apply pure Aloe Vera gel directly from the leaf to cool hot skin."
+    ];
+    medicalRecommendations = [
+      "Apply Ceramide-rich barrier creams to rebuild cuticular lipids.",
+      "Avoid all physical scrubs, AHAs/BHAs, and drying denatured alcohols.",
+      "Consult a doctor to screen for clinical rosacea or contact dermatitis."
+    ];
+  } else if (primaryConcern.name === "Pigmentation") {
+    herbalRecommendations = [
+      "Apply Rosehip seed oil at night to promote skin brightening naturally.",
+      "Use Licorice root extract toner to fade dark patches over time.",
+      "Incorporate green tea extract to reduce UV-induced pigment triggers."
+    ];
+    medicalRecommendations = [
+      "Use topical Niacinamide or Vitamin C serums in the morning.",
+      "Apply a high SPF 50 mineral sunscreen daily to block UV melanin activation.",
+      "Look into Alpha Arbutin or Azelaic Acid clinical treatments."
+    ];
+  } else if (primaryConcern.name === "Wrinkles") {
+    herbalRecommendations = [
+      "Massage face with Argan oil to deeply moisturize and reduce dryness.",
+      "Apply Ginseng root extract to stimulate local microcirculation.",
+      "Incorporate Gotu Kola (Centella Asiatica) to support collagen integrity."
+    ];
+    medicalRecommendations = [
+      "Use Retinol (0.5% - 1%) at night to stimulate skin collagen synthesis.",
+      "Layer Hyaluronic Acid serum under moisturizer to instantly plump lines.",
+      "Use copper peptides or vitamin C serums to shield skin from aging oxides."
+    ];
+  }
+
   return {
     type: 'skin',
     timestamp: new Date().toISOString(),
@@ -210,7 +267,9 @@ function analyzeSkin(visual, answers) {
     },
     primaryConcern,
     routine,
-    products: recommendedProducts
+    products: recommendedProducts,
+    herbalRecommendations,
+    medicalRecommendations
   };
 }
 
@@ -282,6 +341,52 @@ function analyzeHair(visual, answers) {
     return (matchesPorosity && matchesType) || matchesIssue;
   }).slice(0, 3);
 
+  let herbalRecommendations = [
+    "Massage Aloe Vera gel to calm the scalp and lock moisture into cuticles.",
+    "Use Apple Cider Vinegar dilution as a final rinse to balance pH.",
+    "Apply Jojoba or Argan oil to seal split ends and prevent dryness."
+  ];
+  let medicalRecommendations = [
+    "Wash weekly with a sulfate-free hydrating cleanser.",
+    "Apply a clinical leave-in protein conditioner to build strength.",
+    "Avoid chemical relaxers, texturizers, and extreme heat styling."
+  ];
+
+  if (concern === 'damage' || porosity === 'high') {
+    herbalRecommendations = [
+      "Massage warm organic Castor Oil and Coconut Oil into hair shafts weekly.",
+      "Apply Avocado and raw Honey mask for 20 minutes to repair fiber lipids.",
+      "Rinse with Rosemary tea infusion to help strengthen weakened shafts."
+    ];
+    medicalRecommendations = [
+      "Use hydrolyzed vegetable protein or keratin treatments twice monthly.",
+      "Incorporate clinical bond-building shampoo/conditioner routines.",
+      "Trim split ends every 6-8 weeks to prevent progressive shaft peeling."
+    ];
+  } else if (concern === 'frizziness') {
+    herbalRecommendations = [
+      "Apply pure Aloe Vera gel or Flaxseed gel to wet strands to flatten cuticles.",
+      "Perform a warm Olive Oil pre-wash treatment to insulate hair from humidity.",
+      "Rinse with Chamomile tea to smooth strands and enhance cuticle reflection."
+    ];
+    medicalRecommendations = [
+      "Use cationic-active leave-in humectants to seal hair cuticles.",
+      "Apply lightweight silicone or polymer anti-humidity serums before styling.",
+      "Dry hair using a microfiber towel or a cool ionic diffuser."
+    ];
+  } else if (concern === 'density') {
+    herbalRecommendations = [
+      "Apply diluted Rosemary essential oil in pumpkin seed carrier oil daily.",
+      "Massage Peppermint oil dilution into the scalp to stimulate local circulation.",
+      "Rinse scalp with Stinging Nettle infusion to support hair follicle energy."
+    ];
+    medicalRecommendations = [
+      "Apply topical Minoxidil (2% or 5%) solution if diagnosed with thinning.",
+      "Massage clinical copper peptide scalp serums into roots daily.",
+      "Consider visiting a trichologist to verify iron, Vitamin D, or hormonal status."
+    ];
+  }
+
   return {
     type: 'hair',
     timestamp: new Date().toISOString(),
@@ -301,7 +406,9 @@ function analyzeHair(visual, answers) {
              concern === 'damage' ? damage : frizziness
     },
     routine,
-    products: recommendedProducts
+    products: recommendedProducts,
+    herbalRecommendations,
+    medicalRecommendations
   };
 }
 
@@ -346,7 +453,9 @@ JSON Schema for skin:
       { "name": string, "desc": string }
     ]
   },
-  "productIds": ["s1", "s2", "s3", "s4", "s5"] (Choose 2-3 most matching IDs based on their skin conditions)
+  "productIds": ["s1", "s2", "s3", "s4", "s5"], (Choose 2-3 most matching IDs based on their skin conditions)
+  "herbalRecommendations": [string, string, string], (3 organic, plant-based treatments)
+  "medicalRecommendations": [string, string, string] (3 clinical, OTC active treatments)
 }
 
 JSON Schema for hair:
@@ -369,7 +478,9 @@ JSON Schema for hair:
       { "name": string, "desc": string }
     ]
   },
-  "productIds": ["h1", "h2", "h3", "h4", "h5"] (Choose 2-3 most matching IDs based on their hair conditions)
+  "productIds": ["h1", "h2", "h3", "h4", "h5"], (Choose 2-3 most matching IDs based on their hair conditions)
+  "herbalRecommendations": [string, string, string], (3 organic, plant-based scalp/hair treatments)
+  "medicalRecommendations": [string, string, string] (3 clinical, OTC active treatments)
 }
 `;
 
