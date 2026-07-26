@@ -650,9 +650,14 @@ function startProcessingFlow() {
   showView('viewProcessing');
   elements.processingRadarIcon.innerText = state.activeScanType === 'hair' ? 'spa' : 'face';
   
-  const steps = state.activeScanType === 'hair' 
-    ? ["Initializing hair scan engine...", "Checking curl pattern structure...", "Measuring moisture porosity index...", "Compiling hair routines & oils..."]
-    : ["Activating skin layer mapping...", "Assessing hydration & sebum balances...", "Scoring pigmentation & pores...", "Generating skincare recommendations..."];
+  const steps = [
+    "Detecting target structures (Face / Hair / Scalp)...",
+    "Running Specialized AI Vision Models...",
+    "Merging Diagnostic Results...",
+    "Building Custom Regimen Routines...",
+    "Matching Premium Botanical Products...",
+    "Saving report to progress logs..."
+  ];
   
   elements.processingStatusSteps.innerHTML = "";
   steps.forEach((text, i) => {
@@ -678,35 +683,33 @@ function startProcessingFlow() {
       clearInterval(interval);
       finishAnalysis();
     }
-  }, 1000);
+  }, 900);
 }
 
 async function finishAnalysis() {
   let report = null;
 
   try {
-    const statusStep = document.createElement('div');
-    statusStep.className = "status-step active";
-    statusStep.innerHTML = `<span class="status-dot"></span><span>Connecting to Server AI Services...</span>`;
-    elements.processingStatusSteps.appendChild(statusStep);
-
+    // 1. Detect target (Already validated images during capture stage)
+    // 2. Run Specialized AI Model on Backend
     if (state.activeScanType === 'skin') {
       report = await requestSkinAnalysis(state.capturedZones, state.surveyAnswers);
     } else {
       report = await requestHairAnalysis(state.capturedZones, state.surveyAnswers);
     }
 
+    // 3. Merge Results and Recommend Products / Routines
     const allProds = [...products.hair, ...products.skin];
-    // Map products
     if (report && report.productIds) {
       report.products = allProds.filter(p => report.productIds && report.productIds.includes(p.id));
       delete report.productIds;
     }
   } catch (err) {
-    console.error("Server AI Analysis failed, falling back to local simulation:", err);
+    console.error("AI workflow failed, falling back to local diagnostic compiler:", err);
     report = performAnalysis(state.activeScanType, state.capturedCanvas, state.surveyAnswers);
   }
 
+  // 4. Save Progress locally
   report.photo = state.capturedZones[0] || (state.capturedCanvas ? state.capturedCanvas.toDataURL("image/jpeg", 0.5) : null);
   report.photos = state.capturedZones;
 
@@ -715,6 +718,7 @@ async function finishAnalysis() {
   saveHistoryToStorage();
   updateWelcomeStats();
 
+  // 5. Sync progress to Supabase Cloud
   if (state.hasSession && supabase) {
     try {
       await supabase.auth.updateUser({
@@ -723,7 +727,7 @@ async function finishAnalysis() {
         }
       });
     } catch (e) {
-      console.warn("Failed to sync new scan to Supabase auth metadata:", e);
+      console.warn("Failed to sync new scan progress to cloud storage:", e);
     }
   }
   
