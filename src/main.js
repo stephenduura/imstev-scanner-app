@@ -3,7 +3,7 @@ import { elements, initElements, showView } from './shared/ui.js';
 import { initSupabase, supabase } from './services/supabase.js';
 import { requestSkinAnalysis, requestHairAnalysis } from './services/api.js';
 import { performAnalysis } from './scanner/analysis.js';
-import { startCamera, stopCamera, captureFromVideo, loadUploadedFile } from './scanner/camera.js';
+import { startCamera, stopCamera, captureFromVideo, loadUploadedFile, inspectImageQuality } from './scanner/camera.js';
 import { renderHistoryList, downloadCalendarReminder } from './progress/history.js';
 import { initSliderComparer, updateCompareImages } from './progress/comparison.js';
 import { loadProfileFromStorage, saveProfileToStorage, handleSignOut } from './profile/profile.js';
@@ -199,6 +199,14 @@ function setupEventListeners() {
     }
   });
 
+  const retryBtn = document.getElementById('rejection-retry-btn');
+  if (retryBtn) {
+    retryBtn.addEventListener('click', () => {
+      const modal = document.getElementById('quality-rejection-modal');
+      if (modal) modal.style.display = 'none';
+    });
+  }
+
   // Comparison select listeners
   elements.compareBeforeSelect.addEventListener('change', updateCompareImages);
   elements.compareAfterSelect.addEventListener('change', updateCompareImages);
@@ -344,6 +352,70 @@ async function startScanningFlow(type) {
   }
 }
 
+let liveQualityInterval = null;
+
+function startLiveQualityMonitoring() {
+  if (liveQualityInterval) clearInterval(liveQualityInterval);
+  
+  const monitorCanvas = document.createElement('canvas');
+  monitorCanvas.width = 160;
+  monitorCanvas.height = 200;
+
+  liveQualityInterval = setInterval(() => {
+    if (!elements.scannerVideo || elements.scannerVideo.paused || elements.scannerVideo.ended) return;
+    
+    const ctx = monitorCanvas.getContext('2d');
+    if (!ctx) return;
+    ctx.drawImage(elements.scannerVideo, 0, 0, 160, 200);
+
+    const check = inspectImageQuality(monitorCanvas);
+
+    const lightingText = document.getElementById('live-lighting-text');
+    const focusText = document.getElementById('live-focus-text');
+    const scoreText = document.getElementById('live-score-text');
+
+    if (lightingText) {
+      if (check.avgLuminance < 45) {
+        lightingText.innerText = "Too Dark";
+        lightingText.style.color = "#ec7063";
+      } else if (check.avgLuminance > 230) {
+        lightingText.innerText = "Too Bright";
+        lightingText.style.color = "#ec7063";
+      } else {
+        lightingText.innerText = "Good";
+        lightingText.style.color = "#58d68d";
+      }
+    }
+
+    if (focusText) {
+      const sharpnessNormalized = Math.min(100, Math.round((check.sharpness / 12) * 100));
+      if (sharpnessNormalized < 40) {
+        focusText.innerText = "Blurry";
+        focusText.style.color = "#ec7063";
+      } else {
+        focusText.innerText = "Sharp";
+        focusText.style.color = "#58d68d";
+      }
+    }
+
+    if (scoreText) {
+      scoreText.innerText = `${check.score}%`;
+      if (check.score < 50) {
+        scoreText.style.color = "#ec7063";
+      } else {
+        scoreText.style.color = "var(--primary-emerald)";
+      }
+    }
+  }, 500);
+}
+
+function stopLiveQualityMonitoring() {
+  if (liveQualityInterval) {
+    clearInterval(liveQualityInterval);
+    liveQualityInterval = null;
+  }
+}
+
 async function executeScanningFlow() {
   const type = state.activeScanType;
   const guide = document.getElementById('scanner-guide');
@@ -368,7 +440,9 @@ async function executeScanningFlow() {
   showView('viewScanner');
   
   const ok = await startCamera(elements.scannerVideo);
-  if (!ok) {
+  if (ok) {
+    startLiveQualityMonitoring();
+  } else {
     alert("Camera unavailable or permission denied. Please upload a clear photo instead.");
     elements.fileInput.click();
   }
@@ -378,7 +452,7 @@ function updateZoneTracker() {
   const isHair = state.activeScanType === 'hair';
   const zones = isHair 
     ? ["Scalp & Roots (Follicle Health)", "Hair Mid-Shaft (Curls & Porosity)", "Hair Ends (Split Ends & Damage)"]
-    : ["T-Zone (Forehead & Nose Sebum)", "U-Zone (Cheeks & Chin Redness)", "Periorbital (Eye bags & Contour)"];
+    : ["T-Zone (Forehead & Nose Sebum)", "U-Zone (Cheeks & Chin Redness)", "Side Profile (Cheek & Tone)"];
     
   const currentZoneName = zones[state.scannerZoneIndex];
   elements.scannerZoneTitle.innerText = `Zone ${state.scannerZoneIndex + 1} of 3: ${currentZoneName}`;
@@ -390,6 +464,34 @@ function updateZoneTracker() {
     else dots += "○ ";
   }
   elements.scannerZoneSteps.innerText = `[ ${dots.trim()} ]`;
+
+  const topLabel = document.getElementById('guide-label-top');
+  const bottomLabel = document.getElementById('guide-label-bottom');
+  if (topLabel && bottomLabel) {
+    if (isHair) {
+      if (state.scannerZoneIndex === 0) {
+        topLabel.textContent = "ALIGN SCALP & ROOTS";
+        bottomLabel.textContent = "USE BIOTECH MACRO LENS";
+      } else if (state.scannerZoneIndex === 1) {
+        topLabel.textContent = "ALIGN HAIR MID-SHAFT";
+        bottomLabel.textContent = "FOCUS ON HAIR STRANDS";
+      } else {
+        topLabel.textContent = "ALIGN HAIR ENDS & TIPS";
+        bottomLabel.textContent = "CHECK FOR DAMAGE & SPLITS";
+      }
+    } else {
+      if (state.scannerZoneIndex === 0) {
+        topLabel.textContent = "ALIGN FOREHEAD & NOSE";
+        bottomLabel.textContent = "T-ZONE OVAL ALIGNMENT";
+      } else if (state.scannerZoneIndex === 1) {
+        topLabel.textContent = "ALIGN CHEEKS & CHIN";
+        bottomLabel.textContent = "U-ZONE REDNESS CHECK";
+      } else {
+        topLabel.textContent = "ALIGN SIDE PROFILE CHEEK";
+        bottomLabel.textContent = "TURN HEAD 45° TO SIDE";
+      }
+    }
+  }
 }
 
 function triggerScanningVisuals() {
@@ -423,6 +525,7 @@ function triggerScanningVisuals() {
 }
 
 function stopScannerStream() {
+  stopLiveQualityMonitoring();
   stopCamera();
 }
 
@@ -431,6 +534,19 @@ function captureSnapshot() {
   const success = captureFromVideo(elements.scannerVideo, tempCanvas);
   
   if (success) {
+    const check = inspectImageQuality(tempCanvas);
+    if (!check.ok) {
+      const modal = document.getElementById('quality-rejection-modal');
+      const text = document.getElementById('rejection-reason-text');
+      if (modal && text) {
+        text.innerText = `${check.reason}\n\nQuality Confidence Score: ${check.score}% (Requires 50%+)`;
+        modal.style.display = 'flex';
+      } else {
+        alert("Capture Rejected: " + check.reason);
+      }
+      return;
+    }
+
     triggerScanningVisuals();
     
     const compressedCanvas = document.createElement('canvas');
