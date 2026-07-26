@@ -1,7 +1,7 @@
 import { state, surveys, clearUserSessionData } from './shared/state.js';
 import { elements, initElements, showView } from './shared/ui.js';
 import { initSupabase, supabase } from './services/supabase.js';
-import { performOpenAIAnalysis } from './services/openai.js';
+import { requestSkinAnalysis, requestHairAnalysis } from './services/api.js';
 import { performAnalysis } from './scanner/analysis.js';
 import { startCamera, stopCamera, captureFromVideo, loadUploadedFile } from './scanner/camera.js';
 import { renderHistoryList, downloadCalendarReminder } from './progress/history.js';
@@ -567,33 +567,27 @@ function startProcessingFlow() {
 
 async function finishAnalysis() {
   let report = null;
-  const apiKey = localStorage.getItem('imstev_openai_key');
 
-  if (apiKey && apiKey.startsWith("sk-")) {
-    try {
-      const statusStep = document.createElement('div');
-      statusStep.className = "status-step active";
-      statusStep.innerHTML = `<span class="status-dot"></span><span>Connecting to OpenAI Vision AI...</span>`;
-      elements.processingStatusSteps.appendChild(statusStep);
+  try {
+    const statusStep = document.createElement('div');
+    statusStep.className = "status-step active";
+    statusStep.innerHTML = `<span class="status-dot"></span><span>Connecting to Server AI Services...</span>`;
+    elements.processingStatusSteps.appendChild(statusStep);
 
-      const openAIReport = await performOpenAIAnalysis(
-        state.activeScanType, 
-        state.capturedZones, 
-        state.surveyAnswers, 
-        apiKey
-      );
-
-      const allProds = [...products.hair, ...products.skin];
-      openAIReport.products = allProds.filter(p => openAIReport.productIds && openAIReport.productIds.includes(p.id));
-      delete openAIReport.productIds;
-      
-      report = openAIReport;
-    } catch (err) {
-      console.error("OpenAI Analysis failed, falling back to local simulation:", err);
-      alert("OpenAI Scan failed: " + err.message + "\n\nFalling back to local simulation analysis.");
-      report = performAnalysis(state.activeScanType, state.capturedCanvas, state.surveyAnswers);
+    if (state.activeScanType === 'skin') {
+      report = await requestSkinAnalysis(state.capturedZones, state.surveyAnswers);
+    } else {
+      report = await requestHairAnalysis(state.capturedZones, state.surveyAnswers);
     }
-  } else {
+
+    const allProds = [...products.hair, ...products.skin];
+    // Map products
+    if (report && report.productIds) {
+      report.products = allProds.filter(p => report.productIds && report.productIds.includes(p.id));
+      delete report.productIds;
+    }
+  } catch (err) {
+    console.error("Server AI Analysis failed, falling back to local simulation:", err);
     report = performAnalysis(state.activeScanType, state.capturedCanvas, state.surveyAnswers);
   }
 
