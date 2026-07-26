@@ -309,18 +309,9 @@ function analyzeHair(visual, answers) {
  * Sends base64 image and questionnaire to OpenAI API using gpt-4o-mini vision model.
  * Returns professional diagnostic results in a structured format.
  */
-export async function performOpenAIAnalysis(type, canvas, answers, apiKey) {
-  let base64Image = null;
-  if (canvas) {
-    try {
-      base64Image = canvas.toDataURL("image/jpeg", 0.7);
-    } catch (e) {
-      console.warn("Canvas toDataURL failed (possibly tainted canvas), continuing with survey data only:", e);
-    }
-  }
-
+export async function performOpenAIAnalysis(type, photosArray, answers, apiKey) {
   const systemPrompt = `You are a professional board-certified dermatologist and natural hair expert aesthetician.
-Analyze the user's uploaded close-up diagnostic photo and quiz answers.
+Analyze the user's uploaded close-up diagnostic photos representing multiple skin/hair zones (Zone 1: Roots/T-Zone, Zone 2: Shaft/U-Zone, Zone 3: Ends/Eyes) and quiz answers.
 Return a professional-grade, highly accurate JSON analysis report matching the requested schema. Make sure your estimations of scores (0-100) and concern comments are realistic and based on the provided image details (pores, texture, redness, curl pattern, etc).`;
 
   const userPrompt = `
@@ -390,12 +381,14 @@ JSON Schema for hair:
     { type: "text", text: userPrompt }
   ];
 
-  if (base64Image) {
-    contentArray.push({
-      type: "image_url",
-      image_url: {
-        url: base64Image
-      }
+  if (photosArray && photosArray.length > 0) {
+    photosArray.forEach(base64Image => {
+      contentArray.push({
+        type: "image_url",
+        image_url: {
+          url: base64Image
+        }
+      });
     });
   }
 

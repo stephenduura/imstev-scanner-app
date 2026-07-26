@@ -1482,3 +1482,102 @@ input[type="email"]:focus, input[type="password"]:focus, input[type="text"]:focu
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
+/* Interactive Before/After Comparison Swipe Slider */
+.comparison-slider-viewport {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4/5;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #12100F;
+  cursor: ew-resize;
+  user-select: none;
+  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(74, 62, 61, 0.1);
+}
+
+#compare-after-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  overflow: hidden;
+  border-right: 2.5px solid #ffffff;
+  pointer-events: none;
+  box-shadow: 4px 0 15px rgba(0,0,0,0.25);
+}
+
+.compare-badge {
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  letter-spacing: 0.05em;
+  border: 1px solid rgba(255,255,255,0.15);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Macro/Magnifier Viewfinder guides */
+.face-mask-guide.macro-mode {
+  border-radius: 50% !important;
+  width: 160px !important;
+  height: 160px !important;
+  border: 2.5px dashed var(--primary-brown) !important;
+  box-shadow: 0 0 0 9999px rgba(250, 248, 245, 0.7) !important;
+  animation: pulseMacroGuide 2s infinite alternate ease-in-out;
+}
+
+.face-mask-guide.macro-mode.hair-mode {
+  border-color: var(--primary-emerald) !important;
+}
+
+@keyframes pulseMacroGuide {
+  from { transform: scale(0.98); }
+  to { transform: scale(1.02); }
+}
+
+/* Simulated AI Face Scanning Landmarks Overlay Grid */
+.scan-overlay-guide::after {
+  content: '';
+  position: absolute;
+  width: 80%;
+  height: 80%;
+  border-radius: 30px;
+  border: 1px dashed rgba(64, 95, 78, 0.08);
+  background-image: 
+    radial-gradient(circle at 20% 30%, var(--primary-emerald) 1px, transparent 1px),
+    radial-gradient(circle at 80% 30%, var(--primary-emerald) 1px, transparent 1px),
+    radial-gradient(circle at 50% 70%, var(--primary-brown) 1.5px, transparent 1.5px);
+  background-size: 40px 40px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.scan-overlay-guide.active-scanning::after {
+  opacity: 0.35;
+  animation: trackingGridPulse 1.5s infinite alternate ease-in-out;
+}
+
+@keyframes trackingGridPulse {
+  0% { transform: scale(0.96); opacity: 0.2; }
+  100% { transform: scale(1.04); opacity: 0.45; }
+}
+
+/* Glowing dot target anchors */
+.tracking-dot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: var(--light-emerald);
+  border-radius: 50%;
+  box-shadow: var(--glow-emerald), 0 0 8px var(--light-emerald);
+  opacity: 0;
+  pointer-events: none;
+  animation: pulseDotScan 1s infinite alternate;
+}
+
+@keyframes pulseDotScan {
+  from { transform: scale(0.8); opacity: 0.4; }
+  to { transform: scale(1.3); opacity: 1; }
+}
+

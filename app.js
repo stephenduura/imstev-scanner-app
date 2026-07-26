@@ -25,7 +25,10 @@ const state = {
   currentView: 'viewAuth',
   isSpecialistMode: false,
   selectedClient: null,
-  clients: []
+  clients: [],
+  isMacroMode: false,
+  capturedZones: [],
+  scannerZoneIndex: 0
 };
 
 // Survey Configuration
@@ -222,7 +225,22 @@ function initElements() {
     drawerProductsList: document.getElementById('drawer-products-list'),
     drawerSaveBtn: document.getElementById('drawer-save-btn'),
     welcomeSpecialistNotes: document.getElementById('welcome-specialist-notes'),
-    welcomeSpecialistText: document.getElementById('welcome-specialist-text')
+    welcomeSpecialistText: document.getElementById('welcome-specialist-text'),
+
+    // Advanced Diagnostics Viewport Cache
+    scannerZoneTracker: document.getElementById('scanner-zone-tracker'),
+    scannerZoneTitle: document.getElementById('scanner-zone-title'),
+    scannerZoneSteps: document.getElementById('scanner-zone-steps'),
+    macroToggleBtn: document.getElementById('macro-toggle-btn'),
+    macroToggleText: document.getElementById('macro-toggle-text'),
+    historyCompareContainer: document.getElementById('history-compare-container'),
+    compareBeforeSelect: document.getElementById('compare-before-select'),
+    compareAfterSelect: document.getElementById('compare-after-select'),
+    compareSliderViewport: document.getElementById('compare-slider-viewport'),
+    compareBeforeImg: document.getElementById('compare-before-img'),
+    compareAfterContainer: document.getElementById('compare-after-container'),
+    compareAfterImg: document.getElementById('compare-after-img'),
+    compareSliderHandle: document.getElementById('compare-slider-handle')
   };
 }
 
@@ -438,6 +456,30 @@ function setupEventListeners() {
   });
 
   elements.drawerSaveBtn.addEventListener('click', saveSpecialistPrescription);
+
+  // Macro Lens Mode Viewfinder Toggle
+  elements.macroToggleBtn.addEventListener('click', () => {
+    state.isMacroMode = !state.isMacroMode;
+    const guide = document.getElementById('scanner-guide');
+    if (state.isMacroMode) {
+      guide.classList.add('macro-mode');
+      elements.macroToggleText.innerText = "Macro Lens On";
+      elements.macroToggleBtn.style.background = "rgba(64, 95, 78, 0.15)";
+      elements.macroToggleBtn.style.borderColor = "var(--primary-emerald)";
+    } else {
+      guide.classList.remove('macro-mode');
+      elements.macroToggleText.innerText = "Macro Lens Off";
+      elements.macroToggleBtn.style.background = "rgba(250, 248, 245, 0.85)";
+      elements.macroToggleBtn.style.borderColor = "rgba(74, 62, 61, 0.15)";
+    }
+  });
+
+  // Before/After comparison select triggers
+  elements.compareBeforeSelect.addEventListener('change', updateCompareImages);
+  elements.compareAfterSelect.addEventListener('change', updateCompareImages);
+
+  // Initialize interactive comparison swipe slider dragging
+  initSliderComparer();
 }
 
 // Router/View Manager
@@ -493,6 +535,8 @@ async function startScanningFlow(type) {
   state.capturedCanvas = document.createElement('canvas');
   state.surveyStep = 0;
   state.surveyAnswers = {};
+  state.capturedZones = [];
+  state.scannerZoneIndex = 0;
   
   if (!state.hasConsented) {
     toggleConsentModal(true);
@@ -503,21 +547,80 @@ async function startScanningFlow(type) {
 
 async function executeScanningFlow() {
   const type = state.activeScanType;
+  const guide = document.getElementById('scanner-guide');
+  
+  // Reset Macro Mode state at start of scan
+  state.isMacroMode = false;
+  guide.classList.remove('macro-mode');
+  elements.macroToggleText.innerText = "Macro Lens Off";
+  elements.macroToggleBtn.style.background = "rgba(250, 248, 245, 0.85)";
+  elements.macroToggleBtn.style.borderColor = "rgba(74, 62, 61, 0.15)";
+  
   // Set guides
   if (type === 'hair') {
-    elements.scannerGuide.className = "face-mask-guide hair-mode";
+    guide.className = "face-mask-guide hair-mode";
     elements.captureBtn.className = "btn btn-primary gold";
   } else {
-    elements.scannerGuide.className = "face-mask-guide";
+    guide.className = "face-mask-guide";
     elements.captureBtn.className = "btn btn-primary";
   }
   
+  updateZoneTracker();
   showView('viewScanner');
   
   const ok = await startCamera(elements.scannerVideo);
   if (!ok) {
     alert("Camera unavailable or permission denied. Please upload a clear photo instead.");
     elements.fileInput.click();
+  }
+}
+
+function updateZoneTracker() {
+  const isHair = state.activeScanType === 'hair';
+  const zones = isHair 
+    ? ["Scalp & Roots (Follicle Health)", "Hair Mid-Shaft (Curls & Porosity)", "Hair Ends (Split Ends & Damage)"]
+    : ["T-Zone (Forehead & Nose Sebum)", "U-Zone (Cheeks & Chin Redness)", "Periorbital (Eye bags & Contour)"];
+    
+  const currentZoneName = zones[state.scannerZoneIndex];
+  elements.scannerZoneTitle.innerText = `Zone ${state.scannerZoneIndex + 1} of 3: ${currentZoneName}`;
+  
+  let dots = "";
+  for (let i = 0; i < 3; i++) {
+    if (i === state.scannerZoneIndex) dots += "● ";
+    else if (i < state.scannerZoneIndex) dots += "✔ ";
+    else dots += "○ ";
+  }
+  elements.scannerZoneSteps.innerText = `[ ${dots.trim()} ]`;
+}
+
+function triggerScanningVisuals() {
+  const guide = document.querySelector('.scan-overlay-guide');
+  if (guide) {
+    guide.classList.add('active-scanning');
+    
+    const container = document.querySelector('.scanner-view-container');
+    const dots = [];
+    const coordinates = [
+      { top: '30%', left: '35%' },
+      { top: '30%', left: '65%' },
+      { top: '50%', left: '50%' },
+      { top: '65%', left: '35%' },
+      { top: '65%', left: '65%' }
+    ];
+    
+    coordinates.forEach(coords => {
+      const dot = document.createElement('div');
+      dot.className = 'tracking-dot';
+      dot.style.top = coords.top;
+      dot.style.left = coords.left;
+      container.appendChild(dot);
+      dots.push(dot);
+    });
+    
+    setTimeout(() => {
+      guide.classList.remove('active-scanning');
+      dots.forEach(d => d.remove());
+    }, 1200);
   }
 }
 
@@ -528,10 +631,47 @@ function stopScannerStream() {
 
 // Capture Video Snapshot
 function captureSnapshot() {
-  const success = captureFromVideo(elements.scannerVideo, state.capturedCanvas);
+  // Create a temporary canvas for this specific zone capture
+  const tempCanvas = document.createElement('canvas');
+  const success = captureFromVideo(elements.scannerVideo, tempCanvas);
+  
   if (success) {
-    stopScannerStream();
-    startSurveyFlow();
+    triggerScanningVisuals();
+    
+    // Downscale and compress to keep memory footprint tiny (~5-8KB per photo in base64)
+    const compressedCanvas = document.createElement('canvas');
+    compressedCanvas.width = 320;
+    compressedCanvas.height = 400;
+    const cctx = compressedCanvas.getContext('2d');
+    cctx.drawImage(tempCanvas, 0, 0, 320, 400);
+    
+    const base64Img = compressedCanvas.toDataURL("image/jpeg", 0.5);
+    state.capturedZones.push(base64Img);
+    
+    state.scannerZoneIndex++;
+    
+    if (state.scannerZoneIndex < 3) {
+      // Pause snapshot trigger briefly during scan visual effect, then continue
+      elements.captureBtn.disabled = true;
+      setTimeout(() => {
+        updateZoneTracker();
+        elements.captureBtn.disabled = false;
+      }, 1200);
+    } else {
+      // All 3 zones captured
+      elements.captureBtn.disabled = true;
+      setTimeout(() => {
+        // Set the final composite captured canvas to represent the first zone for pixel processing
+        const ctx = state.capturedCanvas.getContext('2d');
+        state.capturedCanvas.width = 320;
+        state.capturedCanvas.height = 400;
+        ctx.drawImage(compressedCanvas, 0, 0);
+        
+        elements.captureBtn.disabled = false;
+        stopScannerStream();
+        startSurveyFlow();
+      }, 1200);
+    }
   } else {
     alert("Failed to capture image. Please try again or upload a photo.");
   }
@@ -545,6 +685,17 @@ async function handleImageUpload(e) {
   stopScannerStream();
   const ok = await loadUploadedFile(file, state.capturedCanvas);
   if (ok) {
+    // For uploads, downscale and duplicate image to mock all 3 zones
+    const compressedCanvas = document.createElement('canvas');
+    compressedCanvas.width = 320;
+    compressedCanvas.height = 400;
+    const cctx = compressedCanvas.getContext('2d');
+    cctx.drawImage(state.capturedCanvas, 0, 0, 320, 400);
+    const base64Img = compressedCanvas.toDataURL("image/jpeg", 0.5);
+    
+    state.capturedZones = [base64Img, base64Img, base64Img];
+    state.scannerZoneIndex = 3;
+    
     startSurveyFlow();
   } else {
     alert("Invalid image file. Please upload a clear JPG or PNG.");
@@ -649,7 +800,7 @@ async function finishAnalysis() {
 
       const openAIReport = await performOpenAIAnalysis(
         state.activeScanType, 
-        state.capturedCanvas, 
+        state.capturedZones, 
         state.surveyAnswers, 
         apiKey
       );
@@ -668,6 +819,10 @@ async function finishAnalysis() {
   } else {
     report = performAnalysis(state.activeScanType, state.capturedCanvas, state.surveyAnswers);
   }
+
+  // Save captured photos to report
+  report.photo = state.capturedZones[0] || (state.capturedCanvas ? state.capturedCanvas.toDataURL("image/jpeg", 0.5) : null);
+  report.photos = state.capturedZones;
 
   state.currentReport = report;
   
@@ -810,10 +965,43 @@ function renderHistoryList() {
   if (state.history.length === 0) {
     elements.historyEmpty.style.display = "flex";
     elements.historyTrendsCard.style.display = "none";
+    elements.historyCompareContainer.style.display = "none";
     return;
   }
   
   elements.historyEmpty.style.display = "none";
+  
+  // Manage Before/After Compare Container
+  if (state.history.length >= 2) {
+    elements.historyCompareContainer.style.display = "block";
+    
+    // Clear and populate options
+    elements.compareBeforeSelect.innerHTML = "";
+    elements.compareAfterSelect.innerHTML = "";
+    
+    state.history.forEach((scan) => {
+      const date = new Date(scan.timestamp);
+      const dateStr = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) + ` (${scan.type === 'hair' ? 'Hair' : 'Skin'})`;
+      
+      const optBefore = document.createElement('option');
+      optBefore.value = scan.timestamp;
+      optBefore.innerText = dateStr;
+      elements.compareBeforeSelect.appendChild(optBefore);
+      
+      const optAfter = document.createElement('option');
+      optAfter.value = scan.timestamp;
+      optAfter.innerText = dateStr;
+      elements.compareAfterSelect.appendChild(optAfter);
+    });
+    
+    // Set default selections: After = newest (index 0), Before = second newest (index 1)
+    elements.compareBeforeSelect.selectedIndex = 1;
+    elements.compareAfterSelect.selectedIndex = 0;
+    
+    updateCompareImages();
+  } else {
+    elements.historyCompareContainer.style.display = "none";
+  }
   
   // Draw SVGs and Progress charts
   renderProgressTrends();
@@ -1697,5 +1885,85 @@ function renderClientSpecialistView() {
     elements.welcomeSpecialistNotes.style.display = 'flex';
   } else {
     elements.welcomeSpecialistNotes.style.display = 'none';
+  }
+}
+
+// Initialize Before/After Compare Drag Slider
+function initSliderComparer() {
+  const viewport = elements.compareSliderViewport;
+  const container = elements.compareAfterContainer;
+  const handle = elements.compareSliderHandle;
+  const afterImg = elements.compareAfterImg;
+
+  function updateSlider(clientX) {
+    const rect = viewport.getBoundingClientRect();
+    const offset = clientX - rect.left;
+    const percentage = Math.max(0, Math.min(100, (offset / rect.width) * 100));
+    
+    container.style.width = percentage + '%';
+    handle.style.left = percentage + '%';
+    afterImg.style.width = rect.width + 'px';
+  }
+
+  let isDragging = false;
+
+  viewport.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    updateSlider(e.clientX);
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    updateSlider(e.clientX);
+  });
+
+  window.addEventListener('mouseup', () => {
+    isDragging = false;
+  });
+
+  // Touch Support
+  viewport.addEventListener('touchstart', (e) => {
+    isDragging = true;
+    if (e.touches.length > 0) {
+      updateSlider(e.touches[0].clientX);
+    }
+  });
+
+  window.addEventListener('touchmove', (e) => {
+    if (!isDragging) return;
+    if (e.touches.length > 0) {
+      updateSlider(e.touches[0].clientX);
+    }
+  });
+
+  window.addEventListener('touchend', () => {
+    isDragging = false;
+  });
+
+  // Handle window resize to keep image aligned
+  window.addEventListener('resize', () => {
+    const rect = viewport.getBoundingClientRect();
+    afterImg.style.width = rect.width + 'px';
+  });
+}
+
+// Update Before/After comparison images from selected dates
+function updateCompareImages() {
+  const beforeId = elements.compareBeforeSelect.value;
+  const afterId = elements.compareAfterSelect.value;
+
+  const beforeScan = state.history.find(s => s.timestamp === beforeId);
+  const afterScan = state.history.find(s => s.timestamp === afterId);
+
+  if (beforeScan && afterScan) {
+    const fallback = "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500";
+    elements.compareBeforeImg.src = beforeScan.photo || fallback;
+    elements.compareAfterImg.src = afterScan.photo || fallback;
+    
+    // Force image width alignment to viewport on load
+    setTimeout(() => {
+      const rect = elements.compareSliderViewport.getBoundingClientRect();
+      elements.compareAfterImg.style.width = rect.width + 'px';
+    }, 50);
   }
 }

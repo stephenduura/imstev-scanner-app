@@ -158,10 +158,22 @@
         <button class="btn btn-secondary" id="close-scanner-btn" style="padding: 8px 16px; font-size: 12px; border-radius: 20px;">Cancel</button>
       </div>
 
-      <div class="scanner-view-container">
+      <!-- Zone Progress Tracker -->
+      <div id="scanner-zone-tracker" style="background: rgba(92, 77, 74, 0.04); border: 1px solid rgba(92, 77, 74, 0.1); padding: 10px 14px; border-radius: 16px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;">
+        <span id="scanner-zone-title" style="font-size: 13px; font-weight: 600; color: var(--primary-brown);">Zone 1 of 3: Capture T-Zone</span>
+        <span id="scanner-zone-steps" style="font-family: var(--font-numeric); font-size: 12px; font-weight: 700; color: var(--primary-emerald);">[ ● ○ ○ ]</span>
+      </div>
+
+      <div class="scanner-view-container" style="position: relative;">
         <!-- Live Video Element -->
         <video id="scanner-video" autoplay playsinline muted></video>
         
+        <!-- Macro Mode Toggle Badge Button -->
+        <button id="macro-toggle-btn" class="btn btn-secondary" style="position: absolute; top: 16px; right: 16px; z-index: 20; padding: 6px 12px; font-size: 11px; border-radius: 12px; display: flex; align-items: center; gap: 4px; background: rgba(250, 248, 245, 0.85); backdrop-filter: blur(10px); border-color: rgba(74, 62, 61, 0.15); color: var(--text-primary);">
+          <i class="material-symbols-outlined" style="font-size: 16px; color: var(--primary-brown);">biotech</i>
+          <span id="macro-toggle-text">Macro Lens Off</span>
+        </button>
+
         <!-- Viewfinder mask guidelines overlay -->
         <div class="scan-overlay-guide">
           <div id="scanner-guide" class="face-mask-guide">
@@ -314,6 +326,43 @@
         <p id="trend-analysis-summary" style="font-size: 12px; color: var(--text-secondary); margin-top: 10px; line-height: 1.4; text-align: center; font-style: italic;">
           Complete multiple scans to visualize your progress trends.
         </p>
+      </div>
+
+      <!-- Before/After Compare Container (hidden by default) -->
+      <div id="history-compare-container" class="results-card" style="display: none; padding: 18px; margin-bottom: 24px;">
+        <h3 style="font-family: var(--font-display); font-size: 16px; color: var(--primary-brown); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;"><i class="material-symbols-outlined" style="font-size: 20px;">difference</i>Compare Scan Progression</h3>
+        
+        <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 11px; color: var(--text-secondary); font-weight: 500;">Before Date</label>
+            <select id="compare-before-select" style="width: 100%; font-size: 12px;"></select>
+          </div>
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+            <label style="font-size: 11px; color: var(--text-secondary); font-weight: 500;">After Date</label>
+            <select id="compare-after-select" style="width: 100%; font-size: 12px;"></select>
+          </div>
+        </div>
+
+        <!-- Interactive Swipe Slider Viewport -->
+        <div class="comparison-slider-viewport" id="compare-slider-viewport">
+          <!-- Before Image Layer (Underneath, full size) -->
+          <img id="compare-before-img" src="" style="position: absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; pointer-events:none;">
+          <span class="compare-badge before" style="position: absolute; bottom: 12px; left: 12px; z-index: 10; font-size: 10px; font-weight: bold; background: rgba(92, 77, 74, 0.85); color: #fff; padding: 4px 8px; border-radius: 6px; text-transform: uppercase;">Before</span>
+
+          <!-- After Image Layer (On top, clipped width) -->
+          <div id="compare-after-container">
+            <img id="compare-after-img" src="" style="position: absolute; top:0; left:0; height:100%; object-fit:cover; max-width: none; pointer-events:none;">
+            <span class="compare-badge after" style="position: absolute; bottom: 12px; right: 12px; z-index: 10; font-size: 10px; font-weight: bold; background: rgba(64, 95, 78, 0.85); color: #fff; padding: 4px 8px; border-radius: 6px; text-transform: uppercase; white-space: nowrap;">After</span>
+          </div>
+
+          <!-- Handle bar -->
+          <div id="compare-slider-handle" style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 40px; height: 100%; display: flex; align-items: center; justify-content: center; z-index: 15; pointer-events: none;">
+            <div style="width: 2px; height: 100%; background: #fff; box-shadow: 0 0 10px rgba(0,0,0,0.5);"></div>
+            <div style="position: absolute; width: 32px; height: 32px; border-radius: 50%; background: #fff; color: var(--primary-brown); box-shadow: 0 4px 10px rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(74, 62, 61, 0.15);">
+              <i class="material-symbols-outlined" style="font-size: 18px; font-weight: bold;">unfold_more</i>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Empty State -->
