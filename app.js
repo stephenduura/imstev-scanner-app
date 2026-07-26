@@ -1506,7 +1506,17 @@ const mockClients = [
 
 // Load and merge specialist clients directory
 function loadClientsList() {
-  let clients = [...mockClients];
+  let clients = [];
+  const stored = localStorage.getItem('imstev_mock_clients');
+  if (stored) {
+    try {
+      clients = JSON.parse(stored);
+    } catch (e) {
+      clients = [...mockClients];
+    }
+  } else {
+    clients = [...mockClients];
+  }
   
   // Add current active client to the specialist directory so they can prescribe notes to themselves
   const currentUserEmail = state.hasSession && supabase && supabase.auth.user ? supabase.auth.user()?.email : "you@local.client";
@@ -1621,8 +1631,8 @@ function openClientDetailDrawer(clientId) {
     div.style.gap = "8px";
     div.style.padding = "4px 0";
     div.innerHTML = `
-      <input type="checkbox" id="prescribe-${prod.id}" value="${prod.id}" ${isChecked ? 'checked' : ''} style="accent-color: var(--primary-gold); cursor: pointer;">
-      <label for="prescribe-${prod.id}" style="font-size: 13px; color: #fff; cursor: pointer;">${prod.name} (${prod.category})</label>
+      <input type="checkbox" id="prescribe-${prod.id}" value="${prod.id}" ${isChecked ? 'checked' : ''} style="accent-color: var(--primary-brown); cursor: pointer;">
+      <label for="prescribe-${prod.id}" style="font-size: 13px; color: var(--text-primary); cursor: pointer;">${prod.name} (${prod.category})</label>
     `;
     elements.drawerProductsList.appendChild(div);
   });
@@ -1645,6 +1655,10 @@ async function saveSpecialistPrescription() {
 
   state.selectedClient.profile.specialistNotes = notes;
   state.selectedClient.profile.productOverrides = productIds;
+
+  // Save clients list to localStorage (excluding the dynamic current user wrapper)
+  const clientsToStore = state.clients.filter(c => c.id !== "current-user-client");
+  localStorage.setItem('imstev_mock_clients', JSON.stringify(clientsToStore));
 
   // If we just updated ourselves, update state profile and sync to Supabase
   if (state.selectedClient.id === "current-user-client") {

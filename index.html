@@ -380,9 +380,9 @@
         <button class="btn btn-secondary" id="signout-btn" style="width: 100%; margin-top: 12px; border-color: #EF4444; color: #EF4444;">Sign Out</button>
       </div>
 
-      <div class="survey-card" style="padding: 20px; margin-top: 16px; display: flex; align-items: center; justify-content: space-between; background: rgba(212, 175, 55, 0.05); border: 1px dashed rgba(212, 175, 55, 0.25);">
+      <div class="survey-card" style="padding: 20px; margin-top: 16px; display: flex; align-items: center; justify-content: space-between; background: rgba(92, 77, 74, 0.04); border: 1px dashed rgba(92, 77, 74, 0.18);">
         <div style="display: flex; flex-direction: column; gap: 4px;">
-          <h4 style="font-size: 14px; font-weight: 600; color: var(--primary-gold);">Specialist Dashboard</h4>
+          <h4 style="font-size: 14px; font-weight: 600; color: var(--primary-brown);">Specialist Dashboard</h4>
           <p style="font-size: 12px; color: var(--text-secondary);">Access client directory and prescribe notes.</p>
         </div>
         <button class="btn btn-primary gold" id="toggle-specialist-btn" style="padding: 8px 14px; font-size: 12px;">Open</button>
@@ -402,7 +402,7 @@
       <!-- Search bar -->
       <div style="padding: 0 16px 16px 16px;">
         <div class="form-group" style="position: relative; display: flex; flex-direction: column;">
-          <input type="text" id="specialist-search" placeholder="Search clients by name..." style="width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 12px 16px 12px 40px; border-radius: 12px; color: #fff; font-family: var(--font-body); font-size: 14px; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--primary-gold)'" onblur="this.style.borderColor='rgba(255,255,255,0.08)'">
+          <input type="text" id="specialist-search" placeholder="Search clients by name..." style="width: 100%; background: rgba(255, 255, 255, 0.7); border: 1px solid rgba(74, 62, 61, 0.12); padding: 12px 16px 12px 40px; border-radius: 12px; color: var(--text-primary); font-family: var(--font-body); font-size: 14px; outline: none; transition: border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1);" onfocus="this.style.borderColor='var(--primary-brown)'" onblur="this.style.borderColor='rgba(74, 62, 61, 0.12)'">
           <i class="material-symbols-outlined" style="position: absolute; left: 14px; top: 12px; color: var(--text-secondary); font-size: 20px;">search</i>
         </div>
       </div>
@@ -414,19 +414,19 @@
 
       <!-- Client Detail Drawer Modal (hidden by default) -->
       <div id="specialist-detail-drawer" class="modal-overlay" style="display: none; align-items: flex-end; justify-content: center; z-index: 1100;">
-        <div class="modal-content" style="width: 100%; max-width: 500px; border-radius: 24px 24px 0 0; padding: 24px; display: flex; flex-direction: column; gap: 20px; max-height: 90vh; overflow-y: auto; background: #0b0f19;">
+        <div class="modal-content" style="width: 100%; max-width: 500px; border-radius: 24px 24px 0 0; padding: 24px; display: flex; flex-direction: column; gap: 20px; max-height: 90vh; overflow-y: auto;">
           <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
               <h3 id="drawer-client-name" style="font-size: 18px; font-weight: 600;">Jane Doe</h3>
               <p id="drawer-client-email" style="font-size: 12px; color: var(--text-secondary);">jane@example.com</p>
             </div>
-            <button class="btn btn-secondary" id="drawer-close-btn" style="padding: 6px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border-color: rgba(255,255,255,0.1);"><i class="material-symbols-outlined" style="font-size: 18px;">close</i></button>
+            <button class="btn btn-secondary" id="drawer-close-btn" style="padding: 6px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border-color: rgba(74, 62, 61, 0.15);"><i class="material-symbols-outlined" style="font-size: 18px;">close</i></button>
           </div>
 
           <!-- Client Scan Trends Sparkline / History Summary -->
           <div>
             <h4 style="font-size: 11px; color: var(--text-secondary); font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Client Progress Summary</h4>
-            <div id="drawer-trends-container" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 16px; border-radius: 16px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+            <div id="drawer-trends-container" style="background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(74, 62, 61, 0.08); padding: 16px; border-radius: 16px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
               <!-- Dynamic Sparkline or Stats -->
             </div>
           </div>
@@ -434,7 +434,7 @@
           <!-- Specialist Notes Form -->
           <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
             <label for="drawer-notes-input" style="font-size: 13px; color: var(--text-secondary); font-weight: 500;">Treatment & Routine Prescription</label>
-            <textarea id="drawer-notes-input" rows="4" placeholder="Write custom salon treatment instructions, bonnet tips, moisture recommendations..." style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 12px 16px; border-radius: 12px; color: #fff; font-family: var(--font-body); font-size: 14px; outline: none; resize: none; line-height: 1.5; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--primary-gold)'" onblur="this.style.borderColor='rgba(255,255,255,0.08)'"></textarea>
+            <textarea id="drawer-notes-input" rows="4" placeholder="Write custom salon treatment instructions, bonnet tips, moisture recommendations..." style="background: rgba(255, 255, 255, 0.7); border: 1px solid rgba(74, 62, 61, 0.12); padding: 12px 16px; border-radius: 12px; color: var(--text-primary); font-family: var(--font-body); font-size: 14px; outline: none; resize: none; line-height: 1.5; transition: border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1);" onfocus="this.style.borderColor='var(--primary-brown)'" onblur="this.style.borderColor='rgba(74, 62, 61, 0.12)'"></textarea>
           </div>
 
           <!-- Product Recommendation Overrides -->
