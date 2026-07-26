@@ -431,6 +431,26 @@ function setupEventListeners() {
 
   // Authentication Buttons Submission
   elements.btnLogin.addEventListener('click', handleLogin);
+  
+  const demoBtn = document.getElementById('btn-demo-login');
+  if (demoBtn) {
+    demoBtn.addEventListener('click', () => {
+      state.hasSession = true;
+      state.profile = {
+        name: "Amara Okafor (Abuja, NG)",
+        age: "25-34",
+        gender: "She/Her",
+        baselineHair: "frizziness",
+        baselineSkin: "acne"
+      };
+      state.history = [];
+      const navBar = document.querySelector('.nav-bar');
+      if (navBar) navBar.style.display = 'flex';
+      showView('viewWelcome');
+      renderClientSpecialistView();
+    });
+  }
+  
   elements.btnRegister.addEventListener('click', handleRegister);
   elements.btnForgot.addEventListener('click', handleForgot);
 
