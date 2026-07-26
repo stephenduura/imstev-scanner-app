@@ -269,6 +269,13 @@ function setupEventListeners() {
     import('./authentication/auth.js').then(m => m.showAuthViewForm('login'));
   });
 
+  const dashScanNowBtn = document.getElementById('dash-scan-now-btn');
+  if (dashScanNowBtn) {
+    dashScanNowBtn.addEventListener('click', () => {
+      startScanningFlow(state.activeScanType || 'skin');
+    });
+  }
+
   elements.btnLogin.addEventListener('click', () => {
     import('./authentication/auth.js').then(m => m.handleLogin());
   });

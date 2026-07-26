@@ -145,11 +145,84 @@
         </div>
       </div>
 
-      <!-- History Statistics Overview -->
-      <div style="margin-top: 15px;">
-        <h4 style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 12px; font-weight: 600;">Scan Dashboard</h4>
-        <div class="quick-stats" id="welcome-stats">
-          <!-- Populated dynamically by app.js -->
+      <!-- Unified Health Score Grid -->
+      <div style="margin-top: 20px;">
+        <h4 style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 12px; font-weight: 600;">Health Overview</h4>
+        <div class="dashboard-scores-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px;">
+          <div class="score-card" style="background: rgba(92, 77, 74, 0.03); border: 1px solid rgba(92, 77, 74, 0.08); padding: 12px 8px; border-radius: 16px; text-align: center; display: flex; flex-direction: column; gap: 4px;">
+            <span style="font-size: 10px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Skin</span>
+            <strong id="dash-score-skin" style="font-size: 20px; font-family: var(--font-numeric); color: var(--primary-emerald);">--</strong>
+            <span style="font-size: 9px; color: var(--text-muted);">Hydration</span>
+          </div>
+          <div class="score-card" style="background: rgba(92, 77, 74, 0.03); border: 1px solid rgba(92, 77, 74, 0.08); padding: 12px 8px; border-radius: 16px; text-align: center; display: flex; flex-direction: column; gap: 4px;">
+            <span style="font-size: 10px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Hair</span>
+            <strong id="dash-score-hair" style="font-size: 20px; font-family: var(--font-numeric); color: var(--primary-brown);">--</strong>
+            <span style="font-size: 9px; color: var(--text-muted);">Health</span>
+          </div>
+          <div class="score-card" style="background: rgba(92, 77, 74, 0.03); border: 1px solid rgba(92, 77, 74, 0.08); padding: 12px 8px; border-radius: 16px; text-align: center; display: flex; flex-direction: column; gap: 4px;">
+            <span style="font-size: 10px; text-transform: uppercase; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">Scalp</span>
+            <strong id="dash-score-scalp" style="font-size: 20px; font-family: var(--font-numeric); color: var(--primary-brown);">--</strong>
+            <span style="font-size: 9px; color: var(--text-muted);">Density</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Today's Routine Card -->
+      <div class="dashboard-card" style="background: var(--card-bg); border: 1px solid rgba(92, 77, 74, 0.1); padding: 16px; border-radius: 20px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <h4 style="font-size: 13px; font-weight: 600; margin: 0; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+            <i class="material-symbols-outlined" style="font-size: 18px; color: var(--primary-emerald);">done_all</i>
+            Today's Routine
+          </h4>
+          <span id="dash-routine-progress" style="font-size: 11px; color: var(--text-muted); font-family: var(--font-numeric); font-weight: 700;">0 of 0 Completed</span>
+        </div>
+        <div style="width: 100%; height: 6px; background: rgba(92, 77, 74, 0.06); border-radius: 3px; overflow: hidden;">
+          <div id="dash-routine-progress-fill" style="width: 0%; height: 100%; background: var(--primary-emerald); transition: width 0.3s ease;"></div>
+        </div>
+        <div id="dash-routine-steps-list" style="display: flex; flex-direction: column; gap: 8px;">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <!-- Goals Tracker Card -->
+      <div class="dashboard-card" style="background: var(--card-bg); border: 1px solid rgba(92, 77, 74, 0.1); padding: 16px; border-radius: 20px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 12px;">
+        <h4 style="font-size: 13px; font-weight: 600; margin: 0; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+          <i class="material-symbols-outlined" style="font-size: 18px; color: var(--primary-brown);">track_changes</i>
+          My Active Goals
+        </h4>
+        <div id="dash-goals-list" style="display: flex; flex-direction: column; gap: 8px;">
+          <!-- Interactive goals list -->
+        </div>
+      </div>
+
+      <!-- Achievements shelf -->
+      <div class="dashboard-card" style="background: var(--card-bg); border: 1px solid rgba(92, 77, 74, 0.1); padding: 16px; border-radius: 20px; margin-bottom: 16px;">
+        <h4 style="font-size: 13px; font-weight: 600; margin: 0 0 12px 0; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+          <i class="material-symbols-outlined" style="font-size: 18px; color: var(--primary-brown);">emoji_events</i>
+          Dermal Achievements
+        </h4>
+        <div id="dash-achievements-shelf" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px;">
+          <!-- Badge list -->
+        </div>
+      </div>
+
+      <!-- Next Recommended Scan Banner -->
+      <div class="dashboard-card" style="background: rgba(64, 95, 78, 0.05); border: 1px solid rgba(64, 95, 78, 0.15); padding: 12px 16px; border-radius: 18px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <i class="material-symbols-outlined" style="color: var(--primary-emerald); font-size: 22px;">event_repeat</i>
+          <div style="display: flex; flex-direction: column; gap: 2px;">
+            <span style="font-size: 12px; font-weight: 600; color: var(--text-primary);">Next Suggested Scan</span>
+            <span id="dash-next-scan-text" style="font-size: 11px; color: var(--text-secondary);">In 6 days (Weekly Check-in)</span>
+          </div>
+        </div>
+        <button class="btn btn-primary" id="dash-scan-now-btn" style="padding: 6px 12px; font-size: 11px; border-radius: 12px; background: var(--primary-emerald); border: none; font-weight: bold; flex-shrink: 0; width: auto; height: auto;">Scan Now</button>
+      </div>
+
+      <!-- Recent Scans Timeline -->
+      <div style="margin-bottom: 24px;">
+        <h4 style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 12px; font-weight: 600;">Recent Diagnostics</h4>
+        <div id="dash-recent-scans-timeline" style="display: flex; flex-direction: column; gap: 10px;">
+          <!-- Populated dynamically -->
         </div>
       </div>
     </main>
