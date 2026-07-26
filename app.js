@@ -1650,36 +1650,39 @@ async function handleSignOut() {
 const mockClients = [
   {
     id: "mock-client-1",
-    email: "sarah.jones@example.com",
+    email: "chioma.nze@example.com",
     profile: {
-      name: "Sarah Jones",
+      name: "Chioma Nze (Lagos, NG)",
       age: "18-24",
       gender: "She/Her",
       baselineHair: "damage",
       baselineSkin: "acne",
-      specialistNotes: "Focus on weekly deep hydration treatments. Avoid sulfate-based shampoos.",
-      productOverrides: ["h1", "s2"]
+      specialistNotes: "Focus on weekly warm oil pre-wash treatments. Protect natural 4C ends.",
+      productOverrides: ["h2", "s4"],
+      avatar: "nigerian_lady_4c.png"
     },
     scans: [
       {
         timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
         type: "hair",
+        photo: "nigerian_lady_4c.png",
         metrics: {
-          type: "3B Curl Pattern",
-          texture: "Medium",
+          type: "4C Curl Pattern",
+          texture: "Coarse",
           porosity: "High Porosity",
-          scores: { frizziness: 75, damage: 60 }
+          scores: { frizziness: 65, damage: 70, density: 85 }
         },
-        primaryConcern: { name: "Dryness / Damage", desc: "Your hair shows elevated split ends." }
+        primaryConcern: { name: "Cuticle Damage", desc: "Ends show high cuticle lifting from heat styling." }
       },
       {
         timestamp: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
         type: "skin",
+        photo: "nigerian_lady_4c.png",
         metrics: {
-          type: "Oily / Acne-Prone",
-          scores: { hydration: 42, sebum: 80, pores: 70, redness: 50, pigmentation: 30, wrinkles: 10, eyebags: 15, darkCircles: 20 }
+          type: "Sensitive Skin",
+          scores: { hydration: 40, sebum: 35, pores: 40, redness: 65, pigmentation: 45, wrinkles: 10, eyebags: 15, darkCircles: 25 }
         },
-        primaryConcern: { name: "Active Breakouts", desc: "Sebum production is highly active." }
+        primaryConcern: { name: "Barrier Irritation", desc: "Capillary sensitivity detected around cheeks." }
       }
     ]
   },
@@ -1693,7 +1696,8 @@ const mockClients = [
       baselineHair: "density",
       baselineSkin: "pigmentation",
       specialistNotes: "Recommend using caffeine scalp tonic twice daily. Wear sunscreen SPF 50 daily.",
-      productOverrides: ["s4"]
+      productOverrides: ["s4"],
+      avatar: ""
     },
     scans: [
       {
@@ -1701,7 +1705,7 @@ const mockClients = [
         type: "skin",
         metrics: {
           type: "Dry / Sensitive",
-          scores: { hydration: 35, sebum: 20, pores: 30, redness: 65, pigmentation: 50, wrinkles: 25, eyebags: 30, darkCircles: 35 }
+          scores: { hydration: 35, sebum: 20, pores: 30, redness: 45, pigmentation: 50, wrinkles: 25, eyebags: 30, darkCircles: 35 }
         },
         primaryConcern: { name: "Pigmentation & Sun Spots", desc: "Mild UV damage detected." }
       }
@@ -1711,15 +1715,29 @@ const mockClients = [
     id: "mock-client-3",
     email: "amara.okafor@example.com",
     profile: {
-      name: "Amara Okafor",
+      name: "Amara Okafor (Abuja, NG)",
       age: "35-44",
-      gender: "They/Them",
+      gender: "She/Her",
       baselineHair: "frizziness",
       baselineSkin: "wrinkles",
-      specialistNotes: "",
-      productOverrides: []
+      specialistNotes: "Use steam treatment cap for low porosity absorption.",
+      productOverrides: ["h3"],
+      avatar: "nigerian_lady_4b.png"
     },
-    scans: []
+    scans: [
+      {
+        timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+        type: "hair",
+        photo: "nigerian_lady_4b.png",
+        metrics: {
+          type: "4B Curl Pattern",
+          texture: "Medium",
+          porosity: "Low Porosity",
+          scores: { frizziness: 50, damage: 30, density: 90 }
+        },
+        primaryConcern: { name: "Low Absorption", desc: "Hair cuticles are tightly sealed, resisting topical moisture." }
+      }
+    ]
   }
 ];
 
@@ -1786,13 +1804,18 @@ function renderClientsDirectory(filterText = "") {
       badgeHtml = `<span class="client-badge no-scans">No scans</span>`;
     }
     
+    const avatarUrl = client.profile.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=60";
+    
     card.innerHTML = `
-      <div class="client-info-main">
-        <h4>${client.profile.name || "Unnamed Client"}</h4>
-        <span>${client.email}</span>
-        <div class="client-meta-badges">
-          ${badgeHtml}
-          <span style="font-size: 11px; color: var(--text-secondary);">Last active: ${lastScanDate}</span>
+      <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
+        <img src="${avatarUrl}" alt="${client.profile.name}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 1.5px solid rgba(74, 62, 61, 0.15); flex-shrink: 0;">
+        <div class="client-info-main" style="flex: 1; display: flex; flex-direction: column; gap: 2px;">
+          <h4 style="margin: 0; font-size: 14px; font-weight: 600; color: var(--text-primary);">${client.profile.name || "Unnamed Client"}</h4>
+          <span style="font-size: 11px; color: var(--text-secondary);">${client.email}</span>
+          <div class="client-meta-badges" style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+            ${badgeHtml}
+            <span style="font-size: 10px; color: var(--text-secondary);">Active: ${lastScanDate}</span>
+          </div>
         </div>
       </div>
       <i class="material-symbols-outlined" style="color: var(--text-secondary); font-size: 20px;">chevron_right</i>
